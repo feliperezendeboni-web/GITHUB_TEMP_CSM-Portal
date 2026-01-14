@@ -2,20 +2,22 @@
 // window.initialDashboardData = JSON.parse(JSON.stringify(window.dashboardData));
 
 // --- CONFIGURATION ---
-// "local" = LocalStorage (Offline)
-// "server" = Node.js Server (Locally hosted)
-// "cloud" = JSONBin.io (For GitHub Pages shared data)
-const STORAGE_MODE = "cloud";
+// Automatic Environment Detection
+// Localhost -> Uses Node.js Server (or falls back to LocalStorage)
+// GitHub/Remote -> Uses JSONBin Cloud
+
+const isLocalhost = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
+const STORAGE_MODE = isLocalhost ? "server" : "cloud";
 
 const API_BASE = "/api";
 const CLOUD_CONFIG = {
-    // 1. Go to https://jsonbin.io/
-    // 2. Sign up (Free) -> Create a new Bin (Private or Public)
-    // 3. Paste the Bin ID here:
-    binId: "REPLACE_WITH_YOUR_BIN_ID_HERE",
-    // 4. Get your API Key (Master Key) from Account -> API Keys
-    apiKey: "REPLACE_WITH_YOUR_API_KEY_HERE"
+    // ⚠️ CRITICAL: You must fill these ONE TIME for the GitHub version to work.
+    // Go to https://jsonbin.io/ -> Create Bin -> Get Bin ID & API Key.
+    binId: "6967ee73d0ea881f406c23d7",
+    apiKey: "$2a$10$dAt2tUWpRiOlH2MMO4J97.ERfargqCJ0I540mQkxzxUovMrnI3Rj6"
 };
+
+console.log(`Environment detected: ${isLocalhost ? 'Local' : 'Remote'}. Using mode: ${STORAGE_MODE}`);
 
 window.DATA_MODE = STORAGE_MODE;
 window.STORAGE_MODE = STORAGE_MODE;
