@@ -820,12 +820,11 @@ window.renderSuccessPlan = function () {
     roadmapControls.style.display = 'flex';
     roadmapControls.style.gap = '10px';
 
-    const showBacklogBtn = document.createElement('button');
-    showBacklogBtn.className = 'btn-tab'; // Reuse tab button style for consistency
-    showBacklogBtn.style.padding = '6px 12px';
-    showBacklogBtn.style.fontSize = '0.85rem';
+    // showBacklogBtn removed per user request. Backlog functionality hidden/disabled.
+    // Defaulting showBacklog to false so archived items remain hidden.
     let showBacklog = false;
-    showBacklogBtn.textContent = window.getUIText ? (showBacklog ? window.getUIText('hideBacklog') : window.getUIText('showBacklog')) : 'Mostrar Backlog';
+
+    // ... showBacklogBtn code removed ...
 
     const addRowBtn = document.createElement('button');
     addRowBtn.className = 'btn-add-goal';
@@ -841,7 +840,16 @@ window.renderSuccessPlan = function () {
         font-size: 0.85rem;
     `;
 
-    roadmapControls.appendChild(showBacklogBtn);
+    // Catalog Button
+    const btnCatalog = document.createElement('button');
+    btnCatalog.className = 'btn-premium';
+    btnCatalog.style.cssText = 'padding: 6px 12px; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; margin-right: 5px; background: rgba(0, 163, 196, 0.2); border: 1px solid rgba(0, 163, 196, 0.5);';
+    btnCatalog.innerHTML = '📚 ' + (window.getUIText ? window.getUIText('refCatalogShort') : 'Catálogo');
+    btnCatalog.title = window.getUIText ? window.getUIText('refCatalog') : "Catálogo de Referência";
+    btnCatalog.onclick = () => { if (window.ReferenceData) window.ReferenceData.openSearchModal(); };
+    roadmapControls.appendChild(btnCatalog);
+
+
     roadmapControls.appendChild(addRowBtn);
     roadmapHeaderContainer.appendChild(roadmapTitle);
     roadmapHeaderContainer.appendChild(roadmapControls);
@@ -899,7 +907,7 @@ window.renderSuccessPlan = function () {
             window.getUIText ? window.getUIText('area') : 'Área',
             window.getUIText ? window.getUIText('category') : 'Categoria',
             window.getUIText ? window.getUIText('involvement') : 'Envolvimento',
-            window.getUIText ? window.getUIText('estHours') : 'Horas/Tokens Est.',
+            window.getUIText ? window.getUIText('estHours') : 'Horas/Credits Est.',
             window.getUIText ? window.getUIText('plannedMonth') : 'Mês Planejado',
             window.getUIText ? window.getUIText('status') : 'Status',
             window.getUIText ? window.getUIText('justification') : 'Justificativa',
@@ -1217,7 +1225,7 @@ window.renderSuccessPlan = function () {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: window.getUIText ? window.getUIText('hours') : 'Horas/Tokens',
+                    label: window.getUIText ? window.getUIText('hours') : 'Horas/Credits',
                     data: hours,
                     backgroundColor: bgColors,
                     borderColor: borderColors,
@@ -1335,12 +1343,7 @@ window.renderSuccessPlan = function () {
         renderConsolidation();
     };
 
-    showBacklogBtn.onclick = () => {
-        showBacklog = !showBacklog;
-        showBacklogBtn.textContent = showBacklog ? (window.getUIText ? window.getUIText('hideBacklog') : 'Ocultar Arquivados') : (window.getUIText ? window.getUIText('showBacklog') : 'Mostrar Arquivados');
-        showBacklogBtn.style.background = showBacklog ? 'var(--table-header-bg)' : '';
-        renderTacticalTable();
-    };
+
 
     renderTacticalTable();
     renderConsolidation();

@@ -11,7 +11,10 @@ const DB_FILE = path.join(__dirname, 'data', 'db.json');
 // Middleware
 app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' })); // Support large project data
+app.use(bodyParser.json({ limit: '50mb' })); // Support large project data
 app.use(express.static(path.join(__dirname, '.'))); // Serve static files from root
+// Explicitly serve reference tables with a clean URL to avoid space encoding issues
+app.use('/api/refs', express.static(path.join(__dirname, 'reference tables')));
 
 // Ensure data directory and db.json exist
 if (!fs.existsSync(path.join(__dirname, 'data'))) {
@@ -124,6 +127,32 @@ app.delete('/api/projects/:id', (req, res) => {
         res.json({ success: true, id: projectId });
     } else {
         res.status(404).json({ error: 'Project not found' });
+    }
+});
+
+// GET /api/reference-files - List Excel files in 'reference tables' folder
+app.get('/api/reference-files', (req, res) => {
+    const refDir = path.join(__dirname, 'reference tables');
+
+    if (!fs.existsSync(refDir)) {
+        return res.json([]);
+    }
+
+    try {
+        const files = fs.readdirSync(refDir).filter(file => {
+            return !file.startsWith('~$') && (file.endsWith('.xlsx') || file.endsWith('.xls') || file.endsWith('.csv'));
+        });
+
+        const fileList = files.map(f => ({
+            id: f.replace(/\s+/g, '_').toLowerCase(),
+            label: f,
+            path: `/api/refs/${f}` // Use safe route
+        }));
+
+        res.json(fileList);
+    } catch (err) {
+        console.error("Error listing reference files:", err);
+        res.status(500).json({ error: "Failed to list files" });
     }
 });
 

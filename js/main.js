@@ -722,6 +722,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         rightGrp.appendChild(btnBackup);
 
+
+
         // Print Button
         const btnPrint = document.createElement('button');
         btnPrint.className = 'btn-print';
