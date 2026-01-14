@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIAGNOSTIC - Main.js Tester</title>
+    <style>
+        body {
+            background: #001f3f;
+            color: white;
+            font-family: monospace;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #2ECC40;
+        }
+
+        .success {
+            color: #2ECC40;
+        }
+
+        .error {
+            color: #FF4136;
+        }
+
+        .section {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #444;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>MAIN.JS DIAGNOSTIC TEST</h1>
+    <div id="status">Testing...</div>
+
+    <script>
+        let statusDiv = document.getElementById('status');
+        let testResults = [];
+
+        function log(message, isError = false) {
+            const className = isError ? 'error' : 'success';
+            const icon = isError ? '❌' : '✅';
+            testResults.push(`<div class="section ${className}">${icon} ${message}</div>`);
+            statusDiv.innerHTML = testResults.join('');
+        }
+
+        window.addEventListener('error', (e) => {
+            log(`ERROR at ${e.filename}:${e.lineno} - ${e.message}`, true);
+        }, true);
+    </script>
+
+    <!-- Load dependencies first -->
+    <script src="js/translations.js"></script>
+    <script>log('translations.js loaded');</script>
+
+    <script src="js/data.js"></script>
+    <script>log('data.js loaded');</script>
+
+    <script src="js/renderTable.js"></script>
+    <script>log('renderTable.js loaded');</script>
+
+    <script src="js/successPlan.js"></script>
+    <script>log('successPlan.js loaded');</script>
+
+    <script src="js/logbook.js"></script>
+    <script>log('logbook.js loaded');</script>
+
+    <script src="js/orgMap.js"></script>
+    <script>log('orgMap.js loaded');</script>
+
+    <script src="js/projectManager.js"></script>
+    <script>log('projectManager.js loaded');</script>
+
+    <script src="js/projectSelector.js"></script>
+    <script>log('projectSelector.js loaded');</script>
+
+    <!-- Now test main.js in sections -->
+    <script>
+        log('Starting main.js section-by-section test...');
+
+        // Test 1: Can we even start the DOMContentLoaded listener?
+        try {
+            document.addEventListener('DOMContentLoaded', () => {
+                log('DOMContentLoaded event listener registered');
+
+                // Test 2: Can we get the app element?
+                try {
+                    const app = document.getElementById('app');
+                    if (app) {
+                        log('app element found');
+                    } else {
+                        log('app element NOT found', true);
+                    }
+                } catch (e) {
+                    log('Error getting app element: ' + e.message, true);
+                }
+
+                // Test 3: Can we access ProjectManager?
+                try {
+                    if (window.ProjectManager) {
+                        log('ProjectManager exists');
+                    } else {
+                        log('ProjectManager does NOT exist', true);
+                    }
+                } catch (e) {
+                    log('Error checking ProjectManager: ' + e.message, true);
+                }
+
+                // Test 4: Can we access dashboardData?
+                try {
+                    if (window.dashboardData) {
+                        log('dashboardData exists with ' + Object.keys(window.dashboardData).length + ' keys');
+                    } else {
+                        log('dashboardData does NOT exist', true);
+                    }
+                } catch (e) {
+                    log('Error checking dashboardData: ' + e.message, true);
+                }
+            });
+            log('DOMContentLoaded setup complete');
+        } catch (e) {
+            log('CRITICAL ERROR setting up DOMContentLoaded: ' + e.message, true);
+        }
+    </script>
+
+    <!-- Try loading actual main.js -->
+    <script>
+        log('Attempting to load main.js...');
+    </script>
+    <script src="js/main.js"></script>
+    <script>
+        log('main.js script tag executed (if you see this, the file loaded)');
+    </script>
+
+    <div id="app"></div>
+</body>
+
+</html>

@@ -1,0 +1,194 @@
+/* --- PRINT STYLES --- */
+@media print {
+    @page {
+        size: landscape;
+        margin: 5mm;
+    }
+
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    body {
+        background-color: #001f3f !important;
+        /* Keep dark theme */
+        color: white !important;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Hide Elements */
+    .btn-print,
+    .btn-save,
+    .btn-ppt,
+    .btn-create-baseline,
+    .btn-delete-baseline,
+    .btn-add-goal,
+    .btn-delete-goal,
+    .btn-toggle-section,
+    .btn-add-row,
+    .btn-archive,
+    .btn-unarchive,
+    .btn-delete,
+    .tabs-container,
+    .language-selector,
+    #toast-container,
+    .footer-buttons,
+    .read-only-badge,
+    .version-selector-container,
+    .column-resizer,
+    .modal-overlay,
+    .logo-wrapper[onclick],
+    /* Hide the click hint */
+    button {
+        display: none !important;
+    }
+
+    /* Ensure all tabs content might be visible? 
+       Actually user usually prints the "Overview". 
+       If they want to print other tabs, they switch to them. 
+       The current CSS hides .tab-content unless active. This is fine. 
+    */
+
+    /* Header adjustments */
+    .header {
+        border-bottom: 2px solid #0074D9;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+    }
+
+    .header-date {
+        color: #fff !important;
+        opacity: 1;
+    }
+
+    .header-owner-input {
+        border: none;
+        background: transparent;
+        color: white;
+    }
+
+    /* Section Distinctiveness */
+    .data-section {
+        margin-bottom: 30px;
+        padding: 20px;
+        border: 1px solid #0074D9;
+        background-color: #002b55 !important;
+        /* Slightly lighter than body for contrast */
+        border-radius: 8px;
+        break-inside: avoid;
+        box-shadow: 0 0 0 1px #0074D9;
+        /* Enhance border */
+    }
+
+    .section-title {
+        color: #7FDBFF !important;
+        /* Brighter Blue */
+        font-size: 1.6rem;
+        font-weight: 800;
+        /* Bolder */
+        border-bottom: 3px solid #7FDBFF;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Input Data Visibility Fix */
+    input,
+    textarea,
+    select {
+        color: #ffffff !important;
+        /* Ensure text is white */
+        font-weight: bold !important;
+        background: rgba(0, 0, 0, 0.2) !important;
+        /* Slight dark bg to show it's a field */
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        padding: 4px !important;
+        -webkit-text-fill-color: #ffffff !important;
+        opacity: 1 !important;
+    }
+
+    /* Placeholder text fix if needed */
+    ::placeholder {
+        color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    /* Table Styling for Print */
+    .status-table,
+    .tactical-table {
+        background-color: #001f3f !important;
+        border: 2px solid #0074D9;
+    }
+
+    .status-table th,
+    .tactical-table th {
+        background-color: #0074D9 !important;
+        /* Solid Blue Header */
+        color: white !important;
+        font-weight: 900 !important;
+        border-bottom: 2px solid white;
+        text-transform: uppercase;
+    }
+
+    .status-table td,
+    .tactical-table td {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        color: white !important;
+        font-weight: 600;
+        /* Bold data */
+    }
+
+    /* Last column (Actions) removal */
+    th:last-child,
+    td:last-child {
+        display: none !important;
+    }
+
+    /* Fix Grid Layout for Print - linearize or keep? Landscape usually handles grid ok. 
+       Let's ensure it doesn't break weirdly.
+    */
+    .dashboard-grid {
+        display: block;
+        /* Linearize for safety or stick to grid? 
+                           If grid, content might get cut off if it overflows page. 
+                           Block allows natural flow across pages. */
+    }
+
+    .indicators-container {
+        display: flex;
+        /* Flex works better than grid for simple row in print */
+        flex-wrap: wrap;
+        gap: 15px;
+        break-inside: avoid;
+        margin-bottom: 25px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .indicator-set {
+        border: 1px solid #0074D9;
+        background: rgba(0, 31, 63, 1) !important;
+        /* Solid background to cover anything behind */
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .hours-balance-container {
+        background: rgba(0, 51, 102, 0.3) !important;
+        border: 1px solid #39cccc;
+        color: white;
+    }
+
+    /* Footer */
+    .app-footer {
+        border-top: 2px solid #0074D9;
+        margin-top: 20px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #001f3f;
+    }
+}
