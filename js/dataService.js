@@ -10,6 +10,8 @@ window.DataService = {
         projectData: {} // Map projectId -> full data object
     },
 
+    CLOUD_CONFIG: null, // Will be loaded from window
+
     isInitialized: false,
 
     // Initialize: Fetch data from source
@@ -22,6 +24,9 @@ window.DataService = {
         }
         if (typeof window.API_BASE !== 'undefined') {
             this.API_BASE = window.API_BASE;
+        }
+        if (typeof window.CLOUD_CONFIG !== 'undefined') {
+            this.CLOUD_CONFIG = window.CLOUD_CONFIG;
         }
 
         console.log(`DataService initializing in ${this.MODE} mode...`);
@@ -63,6 +68,8 @@ window.DataService = {
                 this.handleOffline();
                 return this.listProjectsLocal();
             }
+        } else if (this.MODE === 'cloud') {
+            return this.getProjectsCloud();
         } else {
             return this.listProjectsLocal();
         }
@@ -91,6 +98,14 @@ window.DataService = {
                 // If offline, maybe we have it in memory? or localStorage backup?
                 return this.getProjectLocal(projectId);
             }
+        } else if (this.MODE === 'cloud') {
+            if (this.cache.projectData[projectId]) {
+                return this.cache.projectData[projectId];
+            }
+            // For cloud/single-bin model, getProjects already fetched EVERYTHING.
+            // If it's not in cache, maybe we haven't fetched yet?
+            await this.getProjectsCloud();
+            return this.cache.projectData[projectId] || null;
         } else {
             return this.getProjectLocal(projectId);
         }
@@ -123,11 +138,14 @@ window.DataService = {
                 this.cache.projectData[projectMeta.id] = saved;
 
                 return saved;
+                return saved;
             } catch (e) {
                 console.error("API Error (Create):", e);
                 this.handleOffline();
                 return this.createProjectLocal(projectMeta, projectData);
             }
+        } else if (this.MODE === 'cloud') {
+            return this.createProjectCloud(projectMeta, projectData);
         } else {
             return this.createProjectLocal(projectMeta, projectData);
         }
@@ -156,11 +174,14 @@ window.DataService = {
                 }
 
                 if (window.showToast) window.showToast("Saved to Server");
+                if (window.showToast) window.showToast("Saved to Server");
             } catch (e) {
                 console.error("API Error (Update):", e);
                 this.handleOffline();
                 this.updateProjectDataLocal(projectId, data);
             }
+        } else if (this.MODE === 'cloud') {
+            this.updateProjectCloud(projectId, data);
         } else {
             this.updateProjectDataLocal(projectId, data);
         }
@@ -199,6 +220,8 @@ window.DataService = {
                 this.handleOffline();
                 this.deleteProjectLocal(projectId);
             }
+        } else if (this.MODE === 'cloud') {
+            this.deleteProjectCloud(projectId);
         } else {
             this.deleteProjectLocal(projectId);
         }
@@ -215,6 +238,138 @@ window.DataService = {
     },
     addFeedback: async function (item) { return this.addFeedbackLocal(item); },
     voteFeedback: async function (id) { return this.voteFeedbackLocal(id); },
+
+    // --- Cloud Implementation (JSONBin) ---
+    // Note: JSONBin V3 returns { record: [...], metadata: ... }
+
+    getCloudHeaders: function () {
+        if (!this.CLOUD_CONFIG || !this.CLOUD_CONFIG.apiKey) {
+            console.error("Missing Cloud Config");
+            throw new Error("Missing Cloud Config");
+        }
+        return {
+            'Content-Type': 'application/json',
+            'X-Master-Key': this.CLOUD_CONFIG.apiKey
+        };
+    },
+
+    getProjectsCloud: async function () {
+        try {
+            const url = `https://api.jsonbin.io/v3/b/${this.CLOUD_CONFIG.binId}`;
+            const res = await fetch(url, {
+                method: 'GET',
+                headers: this.getCloudHeaders()
+            });
+            if (!res.ok) throw new Error(`Cloud Error: ${res.status}`);
+
+            const data = await res.json();
+            // JSONBin v3 returns data in .record
+            const projects = data.record || [];
+
+            // Update Cache
+            this.cache.projects = projects.map(p => ({
+                id: p.id,
+                name: p.projectName || p.name,
+                accountId: p.accountId,
+                engagementType: p.engagementType,
+                lastModified: p.lastUpdated || p.lastModified,
+                archived: p.archived
+            }));
+
+            // Cache Data
+            projects.forEach(p => {
+                this.cache.projectData[p.id] = p;
+            });
+
+            if (window.showToast && !this.cloudConnectedToastShown) {
+                window.showToast("☁️ Cloud System Connected");
+                this.cloudConnectedToastShown = true;
+            }
+
+            return this.cache.projects;
+
+        } catch (e) {
+            console.error("Cloud Fetch Error:", e);
+            this.handleOffline(); // Show warning
+            return this.listProjectsLocal();
+        }
+    },
+
+    saveCloudBin: async function (allProjects) {
+        try {
+            const url = `https://api.jsonbin.io/v3/b/${this.CLOUD_CONFIG.binId}`;
+            const res = await fetch(url, {
+                method: 'PUT',
+                headers: this.getCloudHeaders(),
+                body: JSON.stringify(allProjects)
+            });
+            if (!res.ok) throw new Error("Failed to save to cloud");
+
+            if (window.showToast) window.showToast("Saved to Cloud ☁️");
+            return true;
+        } catch (e) {
+            console.error("Cloud Save Error:", e);
+            // Fallback?
+            if (window.showToast) window.showToast("⚠️ Cloud Save Failed");
+            return false;
+        }
+    },
+
+    createProjectCloud: async function (meta, data) {
+        // Prepare Object
+        const fullObject = {
+            ...meta,
+            ...data,
+            id: meta.id, // Ensure ID matches
+            projectName: meta.name, // Ensure Name matches
+            createdBy: 'user', // Placeholder
+            lastUpdated: new Date().toISOString()
+        };
+
+        // 1. Get Current (to ensure we have latest)
+        await this.getProjectsCloud();
+
+        // 2. Append
+        const allProjects = Object.values(this.cache.projectData);
+        allProjects.push(fullObject);
+
+        // 3. Save
+        const success = await this.saveCloudBin(allProjects);
+        if (success) {
+            // Update Cache Manually to ensure sync
+            this.cache.projects.push(meta);
+            this.cache.projectData[meta.id] = fullObject;
+            return fullObject;
+        } else {
+            return this.createProjectLocal(meta, data);
+        }
+    },
+
+    updateProjectCloud: async function (projectId, updates) {
+        // Update Cache First (Optimistic)
+        if (this.cache.projectData[projectId]) {
+            this.cache.projectData[projectId] = { ...this.cache.projectData[projectId], ...updates };
+            // fix meta for list
+            const idx = this.cache.projects.findIndex(p => p.id === projectId);
+            if (idx !== -1) {
+                this.cache.projects[idx].lastModified = updates.lastUpdated || new Date().toISOString();
+                if (updates.projectName) this.cache.projects[idx].name = updates.projectName;
+            }
+        }
+
+        const allProjects = Object.values(this.cache.projectData);
+        await this.saveCloudBin(allProjects);
+    },
+
+    deleteProjectCloud: async function (projectId) {
+        if (this.cache.projectData[projectId]) {
+            delete this.cache.projectData[projectId];
+            this.cache.projects = this.cache.projects.filter(p => p.id !== projectId);
+        }
+        const allProjects = Object.values(this.cache.projectData);
+        await this.saveCloudBin(allProjects);
+    },
+
 
     // --- LocalStorage Implementation (Fallback & Legacy) ---
 
