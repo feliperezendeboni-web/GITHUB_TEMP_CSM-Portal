@@ -2,12 +2,25 @@
 // window.initialDashboardData = JSON.parse(JSON.stringify(window.dashboardData));
 
 // --- CONFIGURATION ---
-const STORAGE_MODE = "server"; // "local" or "server"
-const API_BASE = "/api";
+// "local" = LocalStorage (Offline)
+// "server" = Node.js Server (Locally hosted)
+// "cloud" = JSONBin.io (For GitHub Pages shared data)
+const STORAGE_MODE = "cloud";
 
-window.DATA_MODE = STORAGE_MODE; // Legacy compat
+const API_BASE = "/api";
+const CLOUD_CONFIG = {
+    // 1. Go to https://jsonbin.io/
+    // 2. Sign up (Free) -> Create a new Bin (Private or Public)
+    // 3. Paste the Bin ID here:
+    binId: "REPLACE_WITH_YOUR_BIN_ID_HERE",
+    // 4. Get your API Key (Master Key) from Account -> API Keys
+    apiKey: "REPLACE_WITH_YOUR_API_KEY_HERE"
+};
+
+window.DATA_MODE = STORAGE_MODE;
 window.STORAGE_MODE = STORAGE_MODE;
 window.API_BASE = API_BASE;
+window.CLOUD_CONFIG = CLOUD_CONFIG;
 
 // Main entry point
 document.addEventListener('DOMContentLoaded', async () => {
