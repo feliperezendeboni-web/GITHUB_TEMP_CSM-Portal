@@ -1,1 +1,202 @@
-[]
+[
+  {
+    "id": "suzano_project_1768481769872",
+    "name": "Test Project",
+    "accountId": "123456",
+    "engagementType": "Lite",
+    "createdAt": "2026-01-15T12:56:10.388Z",
+    "lastModified": "2026-01-15T12:56:09.873Z",
+    "archived": false,
+    "healthScore": null,
+    "adoptionLevel": null,
+    "licenseLevel": null,
+    "supportStatus": null,
+    "execEngagement": null,
+    "entitlementUsage": null,
+    "orgMap": {
+      "root": {
+        "id": "root",
+        "name": "Suzano",
+        "role": "",
+        "notes": "",
+        "type": "root",
+        "children": []
+      }
+    },
+    "tasks": {
+      "title": "Tarefas",
+      "headers": [
+        "N.",
+        "Tarefas",
+        "Responsável",
+        "Data Início",
+        "Data Fim",
+        "Status"
+      ],
+      "columns": [
+        "id",
+        "task",
+        "owner",
+        "startDate",
+        "endDate",
+        "status"
+      ],
+      "rows": []
+    },
+    "support": {
+      "title": "Casos de Suporte Escalados",
+      "headers": [
+        "N. Caso",
+        "Descrição",
+        "Responsável",
+        "Status"
+      ],
+      "columns": [
+        "case",
+        "desc",
+        "owner",
+        "status"
+      ],
+      "rows": []
+    },
+    "initiatives": {
+      "title": "Entitlements",
+      "headers": [
+        "Iniciativa / Projeto",
+        "Categoria",
+        "Envolvimento",
+        "Horas/Tokens",
+        "Mês Planejado",
+        "Status"
+      ],
+      "columns": [
+        "tactic",
+        "category",
+        "involvement",
+        "estHours",
+        "plannedMonth",
+        "status"
+      ],
+      "totalHoursPool": 80,
+      "rows": []
+    },
+    "opportunities": {
+      "title": "Oportunidades",
+      "headers": [
+        "N.",
+        "Oportunidade",
+        "Contato",
+        "Comentário",
+        "Status"
+      ],
+      "columns": [
+        "id",
+        "name",
+        "contact",
+        "comment",
+        "status"
+      ],
+      "rows": []
+    },
+    "engagement": {
+      "title": "Engajamento Parceiro",
+      "headers": [
+        "N.",
+        "Engajamento Parceiro",
+        "Contato",
+        "Comentário",
+        "Status"
+      ],
+      "columns": [
+        "id",
+        "name",
+        "contact",
+        "comment",
+        "status"
+      ],
+      "rows": []
+    },
+    "risks": {
+      "title": "Riscos",
+      "headers": [
+        "Risco",
+        "Categoria",
+        "Impacto",
+        "Mitigação em andamento",
+        "Status"
+      ],
+      "columns": [
+        "risk",
+        "category",
+        "impact",
+        "mitigation",
+        "status"
+      ],
+      "rows": []
+    },
+    "strategicGoals": {
+      "cards": []
+    },
+    "milestones": {
+      "items": []
+    },
+    "successMetrics": [],
+    "tacticalRoadmap": {
+      "headers": [
+        "Tática / Ação",
+        "Área",
+        "Categoria",
+        "Envolvimento",
+        "Horas/Tokens Est.",
+        "Mês Planejado",
+        "Status",
+        "Justificativa",
+        "Ações"
+      ],
+      "columns": [
+        "tactic",
+        "area",
+        "category",
+        "involvement",
+        "estHours",
+        "plannedMonth",
+        "status",
+        "justification"
+      ],
+      "rows": [
+        {
+          "tactic": "Nova Tática",
+          "area": "-",
+          "category": "-",
+          "involvement": "Ambos",
+          "estHours": "0",
+          "plannedMonth": "-",
+          "status": "notPlanned",
+          "justification": "",
+          "archived": false
+        }
+      ]
+    },
+    "executiveSummary": {
+      "period": "",
+      "mission": "",
+      "purpose": "",
+      "vision": "",
+      "drivers": [],
+      "enablers": [],
+      "ambition": [],
+      "priorities": []
+    },
+    "logbook": {
+      "entries": []
+    },
+    "columnWidths": {},
+    "projectName": "Test Project",
+    "headerOwner": "",
+    "customSuzanoLogo": "images/default_logo.png",
+    "createdBy": "user",
+    "lastUpdated": "2026-01-15T14:12:15.714Z",
+    "baselines": [],
+    "useCases": []
+  }
+]

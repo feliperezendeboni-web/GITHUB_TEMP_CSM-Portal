@@ -37,24 +37,37 @@ const ReferenceData = {
 
     async refreshCatalogTabs() {
         try {
+            console.log('[RefreshCatalog] Attempting to fetch from /api/catalog...');
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2000);
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // Increased to 5 seconds
 
             const res = await fetch('/api/catalog', { signal: controller.signal });
             clearTimeout(timeoutId);
 
-            if (!res.ok) throw new Error("Failed to fetch catalog");
+            console.log(`[RefreshCatalog] Response status: ${res.status}`);
+            if (!res.ok) throw new Error(`Failed to fetch catalog: ${res.status} ${res.statusText}`);
 
             const newCatalog = await res.json();
+            console.log(`[RefreshCatalog] ✓ Server returned ${newCatalog.length} files:`, newCatalog.map(f => f.name));
             this.processCatalogUpdate(newCatalog);
 
         } catch (e) {
-            console.warn("Server unavailable, using offline fallback:", e.message);
-            const fallbackCatalog = [
-                { name: '2026_Master Entitlements_LIST.csv', lastModified: new Date().toISOString() },
-                { name: 'Training Catalog.csv', lastModified: new Date().toISOString() },
-                { name: 'felipe.csv', lastModified: new Date().toISOString() }
+            console.warn("[RefreshCatalog] ✗ Server unavailable, using offline fallback:", e.message);
+            console.warn("[RefreshCatalog] Error type:", e.name);
+
+            // Use configured file list if available, otherwise use default with ALL known files
+            const filesList = window.CSV_FILES_LIST || [
+                '2026_Master Entitlements_LIST.csv',
+                'Training Catalog.csv',
+                'Training Catalog - Copy.csv'  // Added missing file to fallback
             ];
+
+            const fallbackCatalog = filesList.map(name => ({
+                name: name,
+                lastModified: new Date().toISOString()
+            }));
+
+            console.log(`[RefreshCatalog] Using ${fallbackCatalog.length} files from fallback config:`, filesList);
             this.processCatalogUpdate(fallbackCatalog);
         }
     },
@@ -135,7 +148,7 @@ const ReferenceData = {
 
         const tabsRow = document.createElement('div');
         tabsRow.id = 'ref-tabs-row';
-        tabsRow.style.cssText = 'display:flex; gap:2px; padding:0 15px; background:#1e293b; pt:10px; align-items:flex-end; overflow-x: auto;';
+        tabsRow.style.cssText = 'display:flex; gap:2px; padding:10px 15px 0 15px; background:#1e293b; align-items:flex-end; min-height:50px;';
 
         const searchRow = document.createElement('div');
         searchRow.style.cssText = 'padding:10px 15px; display:flex; gap:10px; align-items:center; background:#0f172a;';
@@ -143,18 +156,70 @@ const ReferenceData = {
         const searchInput = document.createElement('input');
         searchInput.id = 'ref-search-input';
         searchInput.type = 'text';
-        searchInput.placeholder = window.getUIText ? window.getUIText('refSearchPlaceholder') : 'Search...';
-        searchInput.style.cssText = 'padding:8px 12px; border-radius:4px; background:#1e293b; color:white; border:1px solid #334155; flex:1; max-width:400px;';
+        searchInput.placeholder = '🔍 ' + (window.getUIText ? window.getUIText('refSearchPlaceholder') : 'Type to filter...');
+        searchInput.style.cssText = 'padding:10px 15px; border-radius:6px; background:#1e293b; color:white; border:1px solid #475569; flex:1; max-width:500px; font-size:0.95rem;';
         searchInput.oninput = (e) => this.filterCurrentView(e.target.value);
 
         const refreshBtn = document.createElement('button');
         refreshBtn.innerText = '🔄';
-        refreshBtn.title = 'Force Refresh';
-        refreshBtn.style.cssText = 'background:transparent; border:none; color:#94a3b8; cursor:pointer; font-size:1.2rem; margin-left:5px;';
+        refreshBtn.title = 'Force Refresh - Rescan folder and recreate tabs';
+        refreshBtn.style.cssText = 'background:transparent; border:none; color:#94a3b8; cursor:pointer; font-size:1.2rem; margin-left:5px; transition: all 0.3s;';
         refreshBtn.onclick = async () => {
-            refreshBtn.animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }], { duration: 1000 });
-            await this.refreshCatalogTabs();
-            if (this.activeTab) this.loadAndRender(this.activeTab);
+            // Disable button during refresh
+            refreshBtn.disabled = true;
+            refreshBtn.style.opacity = '0.5';
+            refreshBtn.style.cursor = 'wait';
+
+            // Animate rotation
+            const animation = refreshBtn.animate(
+                [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }],
+                { duration: 1000, iterations: Infinity }
+            );
+
+            try {
+                // Show loading message
+                const resultsContainer = document.getElementById('ref-results-container');
+                const previousContent = resultsContainer.innerHTML;
+                resultsContainer.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100%; color:#94a3b8; font-size:1.2rem;">🔄 Refreshing catalog...</div>';
+
+                // Perform refresh - this will add/remove tabs as needed
+                await this.refreshCatalogTabs();
+
+                // If we still have an active tab, reload it
+                if (this.activeTab && this.state.has(this.activeTab)) {
+                    await this.loadAndRender(this.activeTab);
+                } else if (this.state.size > 0) {
+                    // If active tab was removed, activate the first available tab
+                    const firstTab = this.state.keys().next().value;
+                    await this.activateTab(firstTab);
+                } else {
+                    // No tabs available
+                    resultsContainer.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100%; color:#94a3b8; font-size:1.2rem;">No catalog files found</div>';
+                }
+
+                // Show success feedback
+                refreshBtn.innerText = '✓';
+                refreshBtn.style.color = '#10b981';
+                setTimeout(() => {
+                    refreshBtn.innerText = '🔄';
+                    refreshBtn.style.color = '#94a3b8';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Error during refresh:', error);
+                refreshBtn.innerText = '✗';
+                refreshBtn.style.color = '#ef4444';
+                setTimeout(() => {
+                    refreshBtn.innerText = '🔄';
+                    refreshBtn.style.color = '#94a3b8';
+                }, 2000);
+            } finally {
+                // Re-enable button
+                animation.cancel();
+                refreshBtn.disabled = false;
+                refreshBtn.style.opacity = '1';
+                refreshBtn.style.cursor = 'pointer';
+            }
         };
 
         searchRow.appendChild(searchInput);
@@ -175,14 +240,19 @@ const ReferenceData = {
 
     createTab(filename) {
         const tabsRow = document.getElementById('ref-tabs-row');
-        if (!tabsRow) return;
+        if (!tabsRow) {
+            console.error('[createTab] tabsRow not found!');
+            return;
+        }
 
+        console.log(`[createTab] Creating tab for: ${filename}`);
         const btn = document.createElement('button');
         btn.dataset.file = filename;
         btn.innerHTML = this.formatLabel(filename);
         this.setTabStyle(btn, false);
         btn.onclick = () => this.activateTab(filename);
         tabsRow.appendChild(btn);
+        console.log(`[createTab] Tab created and appended for: ${filename}`);
     },
 
     removeTab(filename) {
@@ -365,8 +435,18 @@ const ReferenceData = {
 
         const headers = Object.keys(data[0]);
 
+        // Build unique values for each column - no longer needed for text inputs
+        // const columnValues = {};
+        // headers.forEach(h => {
+        //     const values = new Set();
+        //     data.forEach(row => {
+        //         if (row[h] && row[h].trim()) values.add(row[h].trim());
+        //     });
+        //     columnValues[h] = Array.from(values).sort();
+        // });
+
         let html = `
-            <table style="width:100%; border-collapse:separate; border-spacing:0; font-size:0.85rem;">
+            <table id="ref-data-table" style="width:100%; border-collapse:separate; border-spacing:0; font-size:0.85rem;">
                 <thead>
                     <tr>
                         ${headers.map(h => `
@@ -375,10 +455,22 @@ const ReferenceData = {
                             </th>
                         `).join('')}
                     </tr>
+                    <tr class="filter-row">
+                        ${headers.map((h, idx) => `
+                            <th style="background:#1e293b; padding:6px; position:sticky; top:45px; z-index:19; border-bottom:1px solid #334155;">
+                                <input 
+                                    type="text"
+                                    class="column-filter" 
+                                    data-column="${h}"
+                                    placeholder="Filter ${h}..."
+                                    style="width:100%; padding:6px 8px; background:#0f172a; color:#cbd5e1; border:1px solid #475569; border-radius:4px; font-size:0.75rem; box-sizing:border-box;">
+                            </th>
+                        `).join('')}
+                    </tr>
                 </thead>
                 <tbody>
-                    ${data.map(row => `
-                        <tr>
+                    ${data.map((row, rowIdx) => `
+                        <tr data-row-index="${rowIdx}">
                             ${headers.map(h => `
                                 <td style="padding:8px 12px; border-bottom:1px solid #1e293b; color:#cbd5e1; vertical-align:top; border-right: 1px solid rgba(255,255,255,0.05);">
                                     ${row[h] || ''}
@@ -392,6 +484,57 @@ const ReferenceData = {
 
         container.innerHTML = html;
 
+        // Attach filter event listeners
+        const filterInputs = container.querySelectorAll('.column-filter');
+        filterInputs.forEach(input => {
+            input.addEventListener('input', () => this.applyColumnFilters());
+        });
+
+        // Apply existing search filter if any
+        const searchInput = document.getElementById('ref-search-input');
+        if (searchInput && searchInput.value) {
+            this.filterCurrentView(searchInput.value);
+        }
+    },
+
+    applyColumnFilters() {
+        const container = document.getElementById('ref-results-container');
+        if (!container) return;
+
+        const table = container.querySelector('#ref-data-table');
+        if (!table) return;
+
+        const filters = {};
+        const filterInputs = container.querySelectorAll('.column-filter');
+
+        filterInputs.forEach(input => {
+            const column = input.dataset.column;
+            const value = input.value.trim().toLowerCase();
+            if (value) filters[column] = value;
+        });
+
+        const rows = table.querySelectorAll('tbody tr');
+        const headers = Array.from(table.querySelectorAll('thead tr:first-child th')).map(th => th.textContent.trim());
+
+        rows.forEach(row => {
+            let show = true;
+            const cells = row.querySelectorAll('td');
+
+            for (const [column, filterValue] of Object.entries(filters)) {
+                const colIndex = headers.indexOf(column);
+                if (colIndex >= 0) {
+                    const cellValue = cells[colIndex].textContent.trim().toLowerCase();
+                    if (!cellValue.includes(filterValue)) {
+                        show = false;
+                        break;
+                    }
+                }
+            }
+
+            row.style.display = show ? '' : 'none';
+        });
+
+        // Re-apply text search if active
         const searchInput = document.getElementById('ref-search-input');
         if (searchInput && searchInput.value) {
             this.filterCurrentView(searchInput.value);
@@ -406,9 +549,53 @@ const ReferenceData = {
         const lowerQ = query.toLowerCase();
 
         rows.forEach(row => {
+            // Only filter rows that are not already hidden by column filters
+            if (row.style.display === 'none' && !query) {
+                return; // Keep hidden by column filter
+            }
+
             const text = row.innerText.toLowerCase();
-            row.style.display = text.includes(lowerQ) ? '' : 'none';
+            const matchesSearch = !query || text.includes(lowerQ);
+
+            // Check if row is hidden by column filters
+            const hiddenByColumnFilter = this.isRowHiddenByColumnFilters(row);
+
+            row.style.display = (matchesSearch && !hiddenByColumnFilter) ? '' : 'none';
         });
+    },
+
+    isRowHiddenByColumnFilters(row) {
+        const container = document.getElementById('ref-results-container');
+        if (!container) return false;
+
+        const table = container.querySelector('#ref-data-table');
+        if (!table) return false;
+
+        const filters = {};
+        const filterInputs = container.querySelectorAll('.column-filter');
+
+        filterInputs.forEach(input => {
+            const column = input.dataset.column;
+            const value = input.value.trim().toLowerCase();
+            if (value) filters[column] = value;
+        });
+
+        if (Object.keys(filters).length === 0) return false;
+
+        const headers = Array.from(table.querySelectorAll('thead tr:first-child th')).map(th => th.textContent.trim());
+        const cells = row.querySelectorAll('td');
+
+        for (const [column, filterValue] of Object.entries(filters)) {
+            const colIndex = headers.indexOf(column);
+            if (colIndex >= 0) {
+                const cellValue = cells[colIndex].textContent.trim().toLowerCase();
+                if (!cellValue.includes(filterValue)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 };
 
