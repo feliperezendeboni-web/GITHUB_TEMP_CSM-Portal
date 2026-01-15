@@ -130,9 +130,9 @@ app.delete('/api/projects/:id', (req, res) => {
     }
 });
 
-// GET /api/reference-files - List Excel files in 'reference tables' folder
-app.get('/api/reference-files', (req, res) => {
-    const refDir = path.join(__dirname, 'reference tables');
+// GET /api/catalog - List CSV files in 'reference tables' with metadata
+app.get('/api/catalog', (req, res) => {
+    const refDir = path.resolve(process.cwd(), "reference tables");
 
     if (!fs.existsSync(refDir)) {
         return res.json([]);
@@ -140,19 +140,39 @@ app.get('/api/reference-files', (req, res) => {
 
     try {
         const files = fs.readdirSync(refDir).filter(file => {
-            return !file.startsWith('~$') && (file.endsWith('.xlsx') || file.endsWith('.xls') || file.endsWith('.csv'));
+            return !file.startsWith('~$') && file.toLowerCase().endsWith('.csv');
         });
 
-        const fileList = files.map(f => ({
-            id: f.replace(/\s+/g, '_').toLowerCase(),
-            label: f,
-            path: `/api/refs/${f}` // Use safe route
-        }));
+        const catalog = files.map(f => {
+            const stats = fs.statSync(path.join(refDir, f));
+            return {
+                name: f,
+                lastModified: stats.mtime.toISOString()
+            };
+        });
 
-        res.json(fileList);
+        res.json(catalog);
     } catch (err) {
-        console.error("Error listing reference files:", err);
-        res.status(500).json({ error: "Failed to list files" });
+        console.error("Error listing catalog:", err);
+        res.status(500).json({ error: "Failed to list catalog" });
+    }
+});
+
+// GET /api/catalog/:file - Get content of a specific CSV file
+app.get('/api/catalog/:file', (req, res) => {
+    const refDir = path.resolve(process.cwd(), "reference tables");
+    const fileName = req.params.file;
+    const filePath = path.join(refDir, fileName);
+
+    // Basic security traversal check
+    if (!filePath.startsWith(refDir)) {
+        return res.status(403).send("Forbidden");
+    }
+
+    if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        res.status(404).send("File not found");
     }
 });
 

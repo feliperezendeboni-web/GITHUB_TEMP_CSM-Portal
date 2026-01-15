@@ -1,346 +1,415 @@
+const ReferenceData = {
+    state: new Map(),
+    activeTab: null,
+    modalOpen: false,
+    pollInterval: null,
 
-// js/referenceData.js
+    init() {
+        console.log("ReferenceData initializing (Dynamic Mode)...");
+        window.openReferenceCatalog = (fileId) => this.openCatalog(fileId);
+        window.refreshCatalogTabs = () => this.refreshCatalogTabs();
+    },
 
-window.ReferenceData = {
-    // Lista padrão (fallback)
-    defaultFiles: [
-        {
-            id: 'master_entitlements',
-            label: '2026_Master Entitlements_LIST.csv',
-            path: '/api/refs/2026_Master Entitlements_LIST.csv',
-            data: null
-        },
-        {
-            id: 'training_catalog',
-            label: 'Training Catalog.csv',
-            path: '/api/refs/Training Catalog.csv',
-            data: null
+    async openCatalog(defaultFileId) {
+        this.modalOpen = true;
+        this.renderModalStructure();
+        await this.refreshCatalogTabs();
+
+        if (this.pollInterval) clearInterval(this.pollInterval);
+        this.pollInterval = setInterval(() => {
+            if (this.modalOpen) this.refreshCatalogTabs();
+        }, 10000);
+
+        if (defaultFileId && this.state.has(defaultFileId)) {
+            this.activateTab(defaultFileId);
+        } else if (this.state.size > 0 && !this.activeTab) {
+            const first = this.state.keys().next().value;
+            this.activateTab(first);
         }
-    ],
+    },
 
-    // Lista ativa em tempo de execução
-    files: [],
+    closeCatalog() {
+        this.modalOpen = false;
+        if (this.pollInterval) clearInterval(this.pollInterval);
+        const modal = document.getElementById('ref-catalog-modal');
+        if (modal) modal.remove();
+    },
 
-    // Cache dos dados carregados
-    cache: {},
-
-    /**
-     * Inicializa o módulo, tentando buscar arquivos do servidor local
-     */
-    async init() {
-        this.files = [...this.defaultFiles];
-
+    async refreshCatalogTabs() {
         try {
-            const endpoint = (window.API_BASE || '/api') + '/reference-files';
-            // Adiciona timestamp para evitar cache agressivo de requisições de API
-            const res = await fetch(`${endpoint}?t=${Date.now()}`);
-            if (res.ok) {
-                const updatedList = await res.json();
-                if (Array.isArray(updatedList) && updatedList.length > 0) {
-                    console.log("Lista de referência atualizada via API:", updatedList);
-                    this.files = updatedList;
-                    // Pre-seleciona e limpa cache para garantir dados frescos
-                    this.cache = {};
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+            const res = await fetch('/api/catalog', { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (!res.ok) throw new Error("Failed to fetch catalog");
+
+            const newCatalog = await res.json();
+            this.processCatalogUpdate(newCatalog);
+
+        } catch (e) {
+            console.warn("Server unavailable, using offline fallback:", e.message);
+            const fallbackCatalog = [
+                { name: '2026_Master Entitlements_LIST.csv', lastModified: new Date().toISOString() },
+                { name: 'Training Catalog.csv', lastModified: new Date().toISOString() },
+                { name: 'felipe.csv', lastModified: new Date().toISOString() }
+            ];
+            this.processCatalogUpdate(fallbackCatalog);
+        }
+    },
+
+    processCatalogUpdate(newCatalog) {
+        const newNames = new Set(newCatalog.map(f => f.name));
+        const currentNames = new Set(this.state.keys());
+
+        for (const name of currentNames) {
+            if (!newNames.has(name)) {
+                console.log(`[Catalog] Removing ${name}`);
+                this.removeTab(name);
+                this.state.delete(name);
+                if (this.activeTab === name) {
+                    this.activeTab = null;
                 }
             }
-        } catch (e) {
-            console.log("Modo estático (ou erro na API de lista): usando lista padrão de arquivos.");
+        }
+
+        for (const item of newCatalog) {
+            const existing = this.state.get(item.name);
+
+            if (!existing) {
+                console.log(`[Catalog] Adding ${item.name}`);
+                this.state.set(item.name, {
+                    name: item.name,
+                    lastModified: item.lastModified,
+                    data: null,
+                    loaded: false
+                });
+                this.createTab(item.name);
+            } else {
+                if (existing.lastModified !== item.lastModified) {
+                    console.log(`[Catalog] Updating ${item.name} (Changed)`);
+                    existing.lastModified = item.lastModified;
+                    existing.loaded = false;
+
+                    const btn = document.querySelector(`button[data-file="${item.name}"]`);
+                    if (btn) {
+                        btn.innerHTML = `${this.formatLabel(item.name)} <span style="color:#00A4EF; font-size:0.7em;">●</span>`;
+                    }
+
+                    if (this.activeTab === item.name) {
+                        this.loadAndRender(item.name);
+                    }
+                }
+            }
+        }
+
+        if (!this.activeTab && this.state.size > 0) {
+            this.activateTab(this.state.keys().next().value);
         }
     },
 
-    /**
-     * Tenta carregar arquivo via URL (fetch)
-     */
-    async loadFile(fileConfig) {
-        // Se já tiver cache e NÃO quisermos forçar atualização, retornamos.
-        // Mas o usuário pediu "sempre atualizado", então vamos ignorar cache ou limpar antes.
-        // Vamos tentar fetch sempre na abertura.
+    renderModalStructure() {
+        if (document.getElementById('ref-catalog-modal')) return;
 
-        try {
-            let url = fileConfig.path;
-
-            // Encode path parts if needed
-            if (!url.includes('%20') && !url.startsWith('/api')) {
-                url = encodeURI(url);
-            }
-
-            // Adiciona timestamp para evitar cache do navegador (garante "online update")
-            const separator = url.includes('?') ? '&' : '?';
-            const fetchUrl = `${url}${separator}t=${Date.now()}`;
-
-            console.log(`Tentando carregar: ${fetchUrl}`);
-
-            const response = await fetch(fetchUrl);
-
-            if (!response.ok) {
-                // Se der erro (ex: 404 ou bloqueio de CORS/file no browser), lançamos erro
-                throw new Error(response.statusText || "Falha na conexão/arquivo local");
-            }
-
-            const arrayBuffer = await response.arrayBuffer();
-            return this.parseExcelBuffer(arrayBuffer, fileConfig.id);
-
-        } catch (error) {
-            console.warn("Fetch falhou:", error);
-            return { success: false, error: error.message, isNetworkError: true };
-        }
-    },
-
-    /**
-     * Processa o buffer do Excel usando SheetJS
-     */
-    parseExcelBuffer(arrayBuffer, id) {
-        try {
-            if (typeof XLSX === 'undefined') {
-                throw new Error("Biblioteca SheetJS não carregada.");
-            }
-
-            const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-            if (!workbook.SheetNames.length) throw new Error("Arquivo Excel vazio.");
-
-            // Pega a primeira aba
-            const firstSheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheetName];
-
-            // Converte para JSON
-            const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-
-            this.cache[id] = jsonData;
-            return { success: true, data: jsonData };
-
-        } catch (err) {
-            return { success: false, error: "Erro ao ler estrutura do Excel (CSV válido?): " + err.message };
-        }
-    },
-
-    /**
-     * Abre a Modal Principal
-     */
-    async openSearchModal() {
-        // Inicializa (busca lista atualizada se estiver no server)
-        await this.init();
-
-        // Remove modal anterior
-        const existing = document.querySelector('.reference-modal-overlay');
-        if (existing) document.body.removeChild(existing);
-
-        // --- DOM Elements ---
         const overlay = document.createElement('div');
-        overlay.className = 'reference-modal-overlay';
-        overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; justify-content:center; align-items:center; z-index:10000; backdrop-filter: blur(4px);';
+        overlay.id = 'ref-catalog-modal';
+        overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; display:flex; justify-content:center; align-items:center;';
 
         const content = document.createElement('div');
-        content.className = 'modal-content premium-box';
-        content.style.cssText = 'max-width:1000px; width:95%; height:85vh; display:flex; flex-direction:column; background:#001a33; border:1px solid rgba(255,255,255,0.15); border-radius:12px; box-shadow:0 20px 50px rgba(0,0,0,0.6); overflow:hidden; animation: fadeIn 0.3s ease;';
+        content.style.cssText = 'background:#0f172a; width:90%; height:90%; border-radius:8px; box-shadow:0 0 20px rgba(0,0,0,0.5); display:flex; flex-direction:column; color:white; font-family:var(--font-primary); overflow:hidden; border: 1px solid #334155;';
 
-        // Header
         const header = document.createElement('div');
-        header.style.cssText = 'padding:20px 25px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center; background:linear-gradient(90deg, rgba(0,47,93,0.5) 0%, rgba(0,0,0,0) 100%);';
-
-        const titleValues = document.createElement('div');
-        const titleText = window.t ? window.t('refCatalog') : 'Catálogo de Referência';
-        titleValues.innerHTML = `<h2 style="margin:0; color:white; font-size:1.4rem; display:flex; align-items:center; gap:10px;">📚 ${titleText}</h2>`;
+        header.style.cssText = 'padding:20px; border-bottom:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center; background:#1e293b;';
+        header.innerHTML = `<h2 style="margin:0; display:flex; align-items:center; gap:10px;"><span style="color:#00A4EF; font-size:1.5em;">📚</span> ${window.getUIText ? window.getUIText('refCatalog') : 'Entitlements Catalog'}</h2>`;
 
         const closeBtn = document.createElement('button');
         closeBtn.innerHTML = '&times;';
-        closeBtn.style.cssText = 'background:none; border:none; color:white; font-size:2rem; cursor:pointer; opacity:0.7;';
-        closeBtn.onclick = () => document.body.removeChild(overlay);
-        header.appendChild(titleValues);
+        closeBtn.style.cssText = 'background:none; border:none; color:white; font-size:2rem; cursor:pointer;';
+        closeBtn.onclick = () => this.closeCatalog();
         header.appendChild(closeBtn);
         content.appendChild(header);
 
-        // Toolbar
         const controls = document.createElement('div');
-        controls.style.cssText = 'padding:20px 25px; display:flex; gap:15px; background:rgba(255,255,255,0.02); border-bottom:1px solid rgba(255,255,255,0.05); flex-wrap:wrap; align-items:center;';
+        controls.style.cssText = 'background:#0f172a; border-bottom:1px solid #334155; display:flex; flex-direction:column;';
 
-        const fileSelect = document.createElement('select');
-        fileSelect.style.cssText = 'padding:10px 15px; background:#002f5d; color:white; border:1px solid rgba(255,255,255,0.3); border-radius:6px; cursor:pointer; flex:1; min-width:250px; outline:none;';
+        const tabsRow = document.createElement('div');
+        tabsRow.id = 'ref-tabs-row';
+        tabsRow.style.cssText = 'display:flex; gap:2px; padding:0 15px; background:#1e293b; pt:10px; align-items:flex-end; overflow-x: auto;';
 
-        const updateFileOptions = () => {
-            fileSelect.innerHTML = '';
-            if (this.files.length === 0) {
-                fileSelect.innerHTML = '<option>Nenhum arquivo encontrado</option>';
-            } else {
-                this.files.forEach(f => {
-                    const opt = document.createElement('option');
-                    opt.value = f.id;
-                    opt.innerText = f.label;
-                    fileSelect.appendChild(opt);
-                });
-            }
-        };
-        updateFileOptions();
+        const searchRow = document.createElement('div');
+        searchRow.style.cssText = 'padding:10px 15px; display:flex; gap:10px; align-items:center; background:#0f172a;';
 
         const searchInput = document.createElement('input');
+        searchInput.id = 'ref-search-input';
         searchInput.type = 'text';
-        searchInput.placeholder = window.t ? window.t('refSearchPlaceholder') : 'Digite para filtrar...';
-        searchInput.style.cssText = 'flex:2; padding:10px 15px; border-radius:6px; background:rgba(0,0,0,0.3); color:white; border:1px solid rgba(255,255,255,0.2); min-width:200px;';
+        searchInput.placeholder = window.getUIText ? window.getUIText('refSearchPlaceholder') : 'Search...';
+        searchInput.style.cssText = 'padding:8px 12px; border-radius:4px; background:#1e293b; color:white; border:1px solid #334155; flex:1; max-width:400px;';
+        searchInput.oninput = (e) => this.filterCurrentView(e.target.value);
 
-        controls.appendChild(document.createTextNode((window.t ? window.t('refFile') : 'Arquivo') + ': '));
-        controls.appendChild(fileSelect);
-        controls.appendChild(document.createTextNode(' ' + (window.t ? window.t('refSearch') : 'Buscar') + ': '));
-        controls.appendChild(searchInput);
+        const refreshBtn = document.createElement('button');
+        refreshBtn.innerText = '🔄';
+        refreshBtn.title = 'Force Refresh';
+        refreshBtn.style.cssText = 'background:transparent; border:none; color:#94a3b8; cursor:pointer; font-size:1.2rem; margin-left:5px;';
+        refreshBtn.onclick = async () => {
+            refreshBtn.animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }], { duration: 1000 });
+            await this.refreshCatalogTabs();
+            if (this.activeTab) this.loadAndRender(this.activeTab);
+        };
+
+        searchRow.appendChild(searchInput);
+        searchRow.appendChild(refreshBtn);
+
+        controls.appendChild(tabsRow);
+        controls.appendChild(searchRow);
         content.appendChild(controls);
 
-        // Results
         const resultsContainer = document.createElement('div');
+        resultsContainer.id = 'ref-results-container';
         resultsContainer.style.cssText = 'flex:1; overflow:auto; padding:0; position:relative;';
         content.appendChild(resultsContainer);
 
-        // Drag & Drop Handling (Fallback)
-        const setupDragDrop = () => {
-            const dz = document.createElement('div');
-            dz.id = 'drag-overlay';
-            dz.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,47,93,0.95); z-index:50; display:none; justify-content:center; align-items:center; flex-direction:column; pointer-events:none; transition:opacity 0.2s;';
-            const dropText = window.t ? window.t('refDragDrop') : 'Solte o arquivo para visualizar';
-            dz.innerHTML = `<div style="font-size:4rem;">📂</div><div style="font-size:1.5rem; color:white; margin-top:20px;">${dropText}</div>`;
-            resultsContainer.appendChild(dz);
-
-            const showDz = () => { dz.style.display = 'flex'; dz.style.pointerEvents = 'all'; };
-            const hideDz = () => { dz.style.display = 'none'; dz.style.pointerEvents = 'none'; };
-
-            content.addEventListener('dragenter', (e) => { e.preventDefault(); e.stopPropagation(); showDz(); });
-            const onDragOver = (e) => { e.preventDefault(); e.stopPropagation(); };
-            content.addEventListener('dragover', onDragOver);
-            dz.addEventListener('dragover', onDragOver);
-
-            dz.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); hideDz(); });
-
-            dz.addEventListener('drop', (e) => {
-                e.preventDefault(); e.stopPropagation();
-                hideDz();
-                const file = e.dataTransfer.files[0];
-                if (file) handleManualFileUpload(file);
-            });
-        };
-
-        const handleManualFileUpload = (file) => {
-            const loadingText = window.t ? window.t('refLoading') : 'Carregando...';
-            resultsContainer.innerHTML = `<div style="text-align:center; padding:50px; color:white;">${loadingText}</div>`;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                // Usa o ID selecionado atualmente para "sobrescrever" o cache visualmente
-                const currentId = fileSelect.value;
-                const res = this.parseExcelBuffer(e.target.result, currentId);
-                if (res.success) {
-                    renderTable(res, searchInput.value);
-                } else {
-                    renderTable(res);
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        };
-
-        // Render Function
-        const renderTable = (result, filter = '') => {
-            resultsContainer.innerHTML = '';
-            setupDragDrop(); // Re-attach DnD
-
-            if (!result.success) {
-                // Se falhou (provavelmente CORS/File Protocol), oferecemos o Drop Zone amigável
-                const isFileProtocol = window.location.protocol === 'file:';
-
-                resultsContainer.innerHTML = `
-                    <div style="text-align:center; margin-top:40px; padding:30px; color:#ffcccc;">
-                        <div style="font-size:3rem; margin-bottom:10px;">⚠️</div>
-                        <h3 style="color:#ff6b6b; margin-bottom:15px;">${window.t ? window.t('refError') : 'Não foi possível carregar automaticamente'}</h3>
-                        <p style="opacity:0.8;">${result.error}</p>
-                        
-                        ${isFileProtocol ? `
-                        <div style="margin-top:30px; padding:20px; background:rgba(255,255,255,0.05); border-radius:10px; border:2px dashed rgba(255,255,255,0.2); max-width:500px; margin-left:auto; margin-right:auto;">
-                            <p style="margin-bottom:10px; color:white; font-weight:bold;">${window.t ? window.t('refOfflineMode') : 'Modo Offline Detectado'}</p>
-                            <p style="font-size:0.9rem; opacity:0.8;">${window.t ? window.t('refLocalWarning') : 'O navegador bloqueou a leitura automática do arquivo local.'}</p>
-                            <div style="margin-top:20px; font-size:1.1rem; color:var(--status-blue);">
-                                👉 ${window.t ? window.t('refLocalInstruction') : 'Arraste o arquivo'} <strong>${this.files.find(f => f.id === fileSelect.value)?.label || 'Excel/CSV'}</strong>
-                            </div>
-                        </div>
-                        ` : ''}
-                    </div>`;
-                return;
-            }
-
-            const data = result.data;
-            if (!data || !data.length) {
-                resultsContainer.innerHTML = `<div style="text-align:center; padding:50px; opacity:0.5;">${window.t ? window.t('refEmptyFile') : 'Arquivo vazio.'}</div>`;
-                return;
-            }
-
-            const keys = Object.keys(data[0]);
-            const lowerFilter = filter.toLowerCase();
-
-            let filtered = data;
-            if (lowerFilter.length > 0) {
-                filtered = data.filter(row => {
-                    return keys.some(k => String(row[k] || '').toLowerCase().includes(lowerFilter));
-                });
-            }
-
-            if (!filtered.length) {
-                const noResText = window.t ? window.t('refNoResults') : 'Sem resultados';
-                resultsContainer.innerHTML = `<div style="text-align:center; padding:50px; opacity:0.5;">${noResText} "${filter}".</div>`;
-                return;
-            }
-
-            const table = document.createElement('table');
-            table.style.cssText = 'width:100%; border-collapse:collapse; min-width:800px; font-size:0.9rem;';
-
-            const thead = document.createElement('thead');
-            const trHead = document.createElement('tr');
-            keys.forEach(k => {
-                const th = document.createElement('th');
-                th.innerText = k;
-                th.style.cssText = 'background:#002f5d; color:white; padding:12px 15px; text-align:left; position:sticky; top:0; z-index:10; font-weight:600; white-space:nowrap; border-bottom:2px solid rgba(0,0,0,0.2);';
-                trHead.appendChild(th);
-            });
-            thead.appendChild(trHead);
-            table.appendChild(thead);
-
-            const tbody = document.createElement('tbody');
-            filtered.forEach((row, i) => {
-                const tr = document.createElement('tr');
-                tr.style.background = i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
-
-                keys.forEach(k => {
-                    const td = document.createElement('td');
-                    td.innerText = row[k] || '';
-                    td.style.cssText = 'padding:6px 15px; border-bottom:1px solid rgba(255,255,255,0.05); color:rgba(255,255,255,0.9);';
-                    tr.appendChild(td);
-                });
-                tbody.appendChild(tr);
-            });
-            table.appendChild(tbody);
-            resultsContainer.appendChild(table);
-        };
-
-        // Event Wiring
-        fileSelect.onchange = async () => {
-            const val = fileSelect.value;
-            if (!val) return;
-            const loadText = window.t ? window.t('refLoading') : 'Carregando...';
-            resultsContainer.innerHTML = `<div style="text-align:center; padding:50px;"><span class="loader"></span> ${loadText}</div>`;
-
-            const conf = this.files.find(f => f.id === val);
-            if (conf) {
-                const res = await this.loadFile(conf);
-                renderTable(res, searchInput.value);
-            }
-        };
-
-        searchInput.oninput = (e) => {
-            const val = fileSelect.value;
-            if (val && this.cache[val]) {
-                const data = { success: true, data: this.cache[val] };
-                renderTable(data, e.target.value);
-            }
-        };
-
         overlay.appendChild(content);
         document.body.appendChild(overlay);
+    },
 
-        // Initial Trigger
-        if (fileSelect.options.length > 0) {
-            fileSelect.selectedIndex = 0;
-            fileSelect.dispatchEvent(new Event('change'));
+    createTab(filename) {
+        const tabsRow = document.getElementById('ref-tabs-row');
+        if (!tabsRow) return;
+
+        const btn = document.createElement('button');
+        btn.dataset.file = filename;
+        btn.innerHTML = this.formatLabel(filename);
+        this.setTabStyle(btn, false);
+        btn.onclick = () => this.activateTab(filename);
+        tabsRow.appendChild(btn);
+    },
+
+    removeTab(filename) {
+        const btn = document.querySelector(`button[data-file="${filename}"]`);
+        if (btn) btn.remove();
+        if (this.activeTab === filename) {
+            document.getElementById('ref-results-container').innerHTML = '';
         }
+    },
+
+    setTabStyle(btn, isActive) {
+        btn.style.cssText = `
+            padding: 10px 20px;
+            background: ${isActive ? '#0f172a' : 'transparent'};
+            color: ${isActive ? '#00A4EF' : '#94a3b8'};
+            border: 1px solid ${isActive ? '#334155' : 'transparent'};
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-weight: ${isActive ? 'bold' : 'normal'};
+            transition: all 0.2s;
+            margin-bottom: -4px;
+            z-index: ${isActive ? '10' : '1'};
+            white-space: nowrap;
+        `;
+    },
+
+    formatLabel(filename) {
+        return filename.replace('.csv', '').replace('2026_', '').replace(/_/g, ' ');
+    },
+
+    activateTab(filename) {
+        this.activeTab = filename;
+
+        const tabs = document.querySelectorAll('#ref-tabs-row button');
+        tabs.forEach(t => {
+            const isTarget = t.dataset.file === filename;
+            this.setTabStyle(t, isTarget);
+        });
+
+        this.loadAndRender(filename);
+    },
+
+    async ensureDataLoaded(filename) {
+        const fileObj = this.state.get(filename);
+        if (!fileObj) return null;
+        if (fileObj.loaded && fileObj.data) return fileObj.data;
+
+        try {
+            const encodedName = encodeURIComponent(filename);
+            let res = await fetch(`/api/catalog/${encodedName}`);
+
+            if (!res.ok) {
+                console.log(`API failed, trying direct path for ${filename}`);
+                res = await fetch(`reference tables/${encodedName}`);
+            }
+
+            if (!res.ok) throw new Error("Failed to load from server/file");
+            const text = await res.text();
+            const data = this.parseCSV(text);
+
+            fileObj.data = data;
+            fileObj.loaded = true;
+            this.state.set(filename, fileObj);
+            return data;
+        } catch (e) {
+            console.warn(`Failed to load ${filename} from server/file, trying global fallback:`, e.message);
+
+            // FALLBACK: Use global window data
+            const data = this.loadFromGlobalFallback(filename);
+            if (data) {
+                fileObj.data = data;
+                fileObj.loaded = true;
+                this.state.set(filename, fileObj);
+                return data;
+            }
+
+            console.error("All loading methods failed for:", filename);
+            return null;
+        }
+    },
+
+    loadFromGlobalFallback(filename) {
+        const normalizedName = filename.toLowerCase();
+
+        if (normalizedName.includes('master') && normalizedName.includes('entitlement')) {
+            if (window.RefData_Entitlements) {
+                console.log(`✓ Using global fallback: window.RefData_Entitlements for ${filename}`);
+                return window.RefData_Entitlements;
+            }
+        }
+
+        if (normalizedName.includes('training')) {
+            if (window.RefData_Training) {
+                console.log(`✓ Using global fallback: window.RefData_Training for ${filename}`);
+                return window.RefData_Training;
+            }
+        }
+
+        if (normalizedName.includes('felipe')) {
+            if (window.RefData_Training) {
+                console.log(`✓ Using global fallback: window.RefData_Training for ${filename}`);
+                return window.RefData_Training;
+            }
+        }
+
+        return null;
+    },
+
+    async loadAndRender(filename) {
+        const container = document.getElementById('ref-results-container');
+        if (!container) return;
+
+        container.innerHTML = `<div style="text-align:center; padding:50px;"><span style="font-size:2rem;">⌛</span> Loading...</div>`;
+
+        const data = await this.ensureDataLoaded(filename);
+        if (data) {
+            this.renderTable(data);
+        } else {
+            container.innerHTML = `<div style="text-align:center; padding:50px; color:red;">Failed to load data.</div>`;
+        }
+    },
+
+    async getOptions(fileIdentifier, columnName) {
+        if (this.state.size === 0) {
+            await this.refreshCatalogTabs();
+        }
+
+        let key = fileIdentifier;
+        if (!this.state.has(key)) {
+            for (const k of this.state.keys()) {
+                if (fileIdentifier === 'master_entitlements' && k.includes('Master Entitlements')) {
+                    key = k; break;
+                }
+                if (k.toLowerCase() === fileIdentifier.toLowerCase() + '.csv') {
+                    key = k; break;
+                }
+            }
+        }
+
+        const data = await this.ensureDataLoaded(key);
+        if (!data) return [];
+
+        const opts = new Set();
+        data.forEach(row => {
+            if (row[columnName]) opts.add(row[columnName]);
+        });
+        return Array.from(opts).sort();
+    },
+
+    parseCSV(text) {
+        const lines = text.trim().split(/\r?\n/);
+        if (lines.length < 2) return [];
+        const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
+
+        const result = [];
+        for (let i = 1; i < lines.length; i++) {
+            const row = lines[i].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
+            if (!row) continue;
+
+            const obj = {};
+            headers.forEach((h, index) => {
+                let val = row[index] || '';
+                val = val.replace(/^"|"$/g, '').replace(/""/g, '"').trim();
+                obj[h] = val;
+            });
+            result.push(obj);
+        }
+        return result;
+    },
+
+    renderTable(data) {
+        const container = document.getElementById('ref-results-container');
+        if (!container) return;
+
+        if (!data || data.length === 0) {
+            container.innerHTML = `<div style="text-align:center; padding:50px;">Empty File</div>`;
+            return;
+        }
+
+        const headers = Object.keys(data[0]);
+
+        let html = `
+            <table style="width:100%; border-collapse:separate; border-spacing:0; font-size:0.85rem;">
+                <thead>
+                    <tr>
+                        ${headers.map(h => `
+                            <th style="background:#0f172a; color:#94a3b8; padding:12px; text-align:left; border-bottom:1px solid #334155; position:sticky; top:0; z-index:20;">
+                                ${h}
+                            </th>
+                        `).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.map(row => `
+                        <tr>
+                            ${headers.map(h => `
+                                <td style="padding:8px 12px; border-bottom:1px solid #1e293b; color:#cbd5e1; vertical-align:top; border-right: 1px solid rgba(255,255,255,0.05);">
+                                    ${row[h] || ''}
+                                </td>
+                            `).join('')}
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+
+        container.innerHTML = html;
+
+        const searchInput = document.getElementById('ref-search-input');
+        if (searchInput && searchInput.value) {
+            this.filterCurrentView(searchInput.value);
+        }
+    },
+
+    filterCurrentView(query) {
+        const container = document.getElementById('ref-results-container');
+        if (!container) return;
+        const rows = container.querySelectorAll('tbody tr');
+
+        const lowerQ = query.toLowerCase();
+
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(lowerQ) ? '' : 'none';
+        });
     }
 };
+
+ReferenceData.init();

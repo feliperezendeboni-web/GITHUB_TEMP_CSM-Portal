@@ -846,7 +846,7 @@ window.renderSuccessPlan = function () {
     btnCatalog.style.cssText = 'padding: 6px 12px; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; margin-right: 5px; background: rgba(0, 163, 196, 0.2); border: 1px solid rgba(0, 163, 196, 0.5);';
     btnCatalog.innerHTML = '📚 ' + (window.getUIText ? window.getUIText('refCatalogShort') : 'Catálogo');
     btnCatalog.title = window.getUIText ? window.getUIText('refCatalog') : "Catálogo de Referência";
-    btnCatalog.onclick = () => { if (window.ReferenceData) window.ReferenceData.openSearchModal(); };
+    btnCatalog.onclick = () => { if (window.openReferenceCatalog) window.openReferenceCatalog(); };
     roadmapControls.appendChild(btnCatalog);
 
 
@@ -898,6 +898,28 @@ window.renderSuccessPlan = function () {
         const table = document.createElement('table');
         table.className = 'status-table tactical-table';
 
+        // Prepare DataList for Tactic (Entitlements)
+        const datalistId = 'dl-entitlements-' + Date.now();
+        let datalist = document.getElementById('dl-entitlements-shared');
+        if (!datalist) {
+            datalist = document.createElement('datalist');
+            datalist.id = 'dl-entitlements-shared';
+            document.body.appendChild(datalist);
+
+            // Async load options
+            if (window.ReferenceData) {
+                // Assuming 'master_entitlements' file and 'Entitlement Name' column from header check
+                window.ReferenceData.getOptions('master_entitlements', 'Entitlement Name').then(opts => {
+                    datalist.innerHTML = '';
+                    opts.forEach(opt => {
+                        const option = document.createElement('option');
+                        option.value = opt;
+                        datalist.appendChild(option);
+                    });
+                });
+            }
+        }
+
         // Header
         const thead = document.createElement('thead');
         const headerRow = document.createElement('tr');
@@ -936,13 +958,21 @@ window.renderSuccessPlan = function () {
             if (row.archived) tr.style.opacity = '0.6';
 
             // Tactic cell
+            // Tactic cell - Converted to Input for Datalist support
             const tdTactic = document.createElement('td');
-            tdTactic.contentEditable = 'true';
-            tdTactic.textContent = row.tactic;
-            tdTactic.onblur = (e) => {
-                window.dashboardData.tacticalRoadmap.rows[rowIndex].tactic = e.target.textContent;
+            tdTactic.style.padding = '0'; // Removing padding so input fills cell
+
+            const tacticInput = document.createElement('input');
+            tacticInput.type = 'text';
+            tacticInput.value = row.tactic;
+            tacticInput.setAttribute('list', 'dl-entitlements-shared');
+            tacticInput.style.cssText = 'width: 100%; border: none; background: transparent; color: inherit; padding: 12px 15px; font-family: inherit; font-size: inherit; outline: none;';
+
+            tacticInput.onchange = (e) => {
+                window.dashboardData.tacticalRoadmap.rows[rowIndex].tactic = e.target.value;
                 window.saveData();
             };
+            tdTactic.appendChild(tacticInput);
             tr.appendChild(tdTactic);
 
             // Area cell (New)

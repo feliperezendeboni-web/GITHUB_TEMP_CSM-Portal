@@ -1,0 +1,162 @@
+﻿"Title","Duration","Solutions","Description","Target Audience","Prerequisites ","Learning Objectives ","Created By"
+"Alteryx Designer Advanced Certification Exam Preparation","01:30","[""Designer""]","Learn what to expect on the Alteryx Designer Advanced Certification exam and which resources are available to help you prepare. You will get an overview of the Designer tools covered; the types of questions that appear in the Advanced exam; tips and tricks; and also work through some sample questions. ","This course is designed for anyone Alteryx Designer Core Certified who has continued to elevate their Alteryx skills and wants to take the Advanced Certification exam. ","A licensed copy of Alteryx Designer. 
+
+Proficiency in advanced data prep, parsing, apps, macros, and spatial tools is essential. 
+
+The Alteryx Designer Core Certification must be completed and passed before taking the Alteryx Designer Advanced Certification exam. ","List the tools, topics, and requirements of the Alteryx Designer Advanced Exam. 
+
+Identify the best practices and techniques to prepare for and take the exam. ","Esther Matthews"
+"Alteryx Designer Core Certification Exam Preparation ","01:30","[""Designer""]","Learn what to expect on the Alteryx Designer Core Certification exam and which resources are available to help you prepare. You will get an overview of the Designer tools covered; the types of questions that appear in the exam; tips and tricks; and then work through some sample questions.","This course is designed for anyone who wants to learn more about and will attempt to pass the Alteryx Designer Core Certification exam. ","A licensed copy of Alteryx Designer. 
+
+Proficiency in basic data preparation, transformation, manipulation, and general Alteryx knowledge is essential. ","List the tools, topics, and requirements of the Alteryx Designer Core exam. 
+
+Identify the best practices and techniques to prepare for and take the exam. ","Esther Matthews"
+"Alteryx Server Administration Foundations ","01:30","[""Server""]","This course will teach you the fundamentals of how to perform the tasks of an Alteryx Server administrator. 
+
+Throughout this course, you will learn about the roles and permissions of Alteryx Server users and how to manage Server use. You will explore the Server interface and discover how to manage workflows, schedules, credentials, and data connections. ","his course is designed for anyone who wants to become an Alteryx Server administrator.","Experience using Alteryx Server is recommended. ","Navigate the Server interface for administrators. 
+
+Identify user roles, permissions, and settings for Server. 
+
+Manage Server users, workflows, schedules, credentials, and data connections. ","Esther Matthews"
+"Apply Advanced Data Preparation Techniques with Multi-Tools","01:30","[""Designer""]","Take your data preparation skills to the next level in this course for experienced users. Learn how to streamline complex processes using the Multi-Field Formula, Multi-Row Formula, and Join Multiple tools. Through a practical, real-world scenario, you will conquer a challenging dataset and solve critical business questions. Discover advanced techniques that will revolutionize your workflow efficiency! ","This course is designed for experienced Designer users looking to enhance their data preparation workflows with advanced tools and techniques. ","A licensed copy of Alteryx Designer. 
+
+Proficiency in foundational data prep tasks such as filtering, joining, and using basic formulas in Designer. 
+
+Familiarity with the RegEx tool and Regular Expressions. ","Parse messy data with the Regular Expression (RegEx) tool. 
+
+Efficiently process data vertically and horizontally with Multi-Tools. ","Esther Matthews"
+"Automate Data Validation in Your Workflows","01:30","[""Designer""]","Do you build large workflows that join multiple datasets together? Learn how to insert checkpoints in your workflows that automate tracking and testing to ensure your data is accurate, clean, and easy to troubleshoot.","This course is designed for experienced Designer users who build complex workflows and want to learn how to add checkpoints for automated tracking, testing, and troubleshooting. ","A licensed copy of Alteryx Designer.  ","Validate data dynamically in workflows by using automated tracking and testing checkpoints.","Esther Matthews"
+"Automate Processes with Iterative Macros","01:30","[""Designer""]","Ready to take your macro-building skills to the next level with automation? This advanced course focuses on iterative macros, allowing you to run a process repeatedly until the desired outcome is achieved. Having prior knowledge of standard or batch macros is highly recommended to enhance your learning experience in this course.","This course is designed for experienced Designer users who are familiar with standard or batch macros and want to expand their automation skills by learning to build iterative macros. ","A licensed copy of Alteryx Designer.  
+
+Familiarity with the Interface tools palette and creating Macros in Designer. ","Create a macro that iterates a process until the data meets your desired conditions. ","Esther Matthews"
+"Balance a Modern Governance Framework ","01:30","[""Designer""]","How can organizations best govern their analytics workflows? This course introduces a modern, adaptable governance framework designed to strike the right balance between flexibility and control. You’ll learn how to maintain the agility of Alteryx while applying structured governance for sensitive data and repeatable processes. ","This course is ideal for individuals seeking to implement effective governance in Alteryx workflows without sacrificing flexibility or control. ","A licensed copy of Alteryx Designer Desktop. 
+
+Proficiency in using Designer Desktop. ","Apply governance best practices to effectively manage, document, and share workflows in Alteryx Designer. ","Esther Matthews"
+"Blend Data from Multiple Datasets","01:30","[""Designer""]","Do you need to combine different datasets to get the results you need? This beginner course teaches you how to blend multiple data inputs using tools in the Join palette—Union, Join, Append, and Find Replace—helping you uncover meaningful insights.","This course is ideal for beginners who want to learn how to combine datasets from multiple sources for their data analysis. ","A licensed copy of Alteryx Designer. ","Use tools from the Join palette to blend data from multiple inputs, append records of data, and replace string values. ","Esther Matthews"
+"Build Chained Apps","01:30","[""Designer""]","Sometimes a workflow needs the results from another workflow before it can run. In this course, discover how easy it is to chain apps so that when one finishes, the next app in the chain starts!","This course is designed for anyone who wants to use Alteryx Designer to create and chain analytic apps. ","A licensed copy of Alteryx Designer. ","Create and chain analytic apps together to display a dynamic interface that updates results based on user selections. ","Esther Matthews"
+"Build Tailored Reporting Processes with Batch Reporting ","01:30","[""Designer""]","Do you need to create numerous customized reports and distribute them to multiple recipients? In this intermediate course, learn how to use batch reporting to make your Designer Desktop reports dynamic so they can be created and distributed automatically.","This course is designed for desktop users who regularly create and distribute multiple customized reports.","A licensed copy of Alteryx Designer. ","Create a batch report from a single workflow. 
+
+Include titles, maps, graphs, and tables in batch reports. ","Esther Matthews"
+"Build Your First Classification Model in Machine Learning ","01:30","[""Intelligence Suite""]","Join this hands-on course to build a classification model from scratch. Discover how to design effective features and evaluate model performance using machine learning tools within Alteryx Intelligence Suite. Having a foundational understanding of supervised machine learning methods is highly recommended prior to taking this course.","This course is designed for anyone who wants to learn how to use Machine Learning to build classification models with Alteryx Intelligence Suite. ","A licensed copy of Alteryx Designer.  
+
+Alteryx Intelligence Suite installation. ","Build a classification model with the Assisted Modeling tool in Alteryx Intelligence Suite. ","Esther Matthews"
+"Build Your First Dynamic Workflows ","01:30","[""Designer""]","Learn to create dynamic workflows that adapt to changing scenarios and future-proof your processes against errors. This introductory course provides theoretical insights and practical examples to enhance the flexibility of your workflows.","This course is designed for anyone who wants to build flexible workflows that adapt to changing scenarios and minimize errors. ","A licensed copy of Alteryx Designer. ","Describe the difference between static and dynamic workflows. 
+
+Transform static workflows into dynamic ones using specific tools or by adjusting the settings of commonly used tools. ","Esther Matthews"
+"Build Your First Macro","01:30","[""Designer""]","Macros might be confusing at first, but once you learn to build them, they can save you time and enhance your data analytics skills. This beginner course is designed for you if you have little to no experience with macros but are well-versed in Designer Desktop or Core Certified. Discover how simple it is to create and share your first standard macro. ","This course is designed for Designer users who want to start building macros to save time and enhance their data analytics skills. ","A licensed copy of Alteryx Designer.  
+
+Familiarity with the Interface tools palette. ","Build a standard macro that automates workflow processes for greater efficiency. 
+
+Share a macro with other users. ","Esther Matthews"
+" Conditional Statements Using the Formula Tool","01:30","[""Designer""]","This course focuses on streamlining the data preparation process in Alteryx Designer. During training, you will learn how to identify different types of conditional statements and manipulate data using conditional statement logic. You will also learn how to structure different types of conditional statements in the Formula tool’s Expression Editor. ","This course is designed for users with beginner-level proficiency in Alteryx who want to use conditional statements to change and manipulate data to satisfy conditions set by users. ","A licensed copy of Alteryx Designer. ","Identify different types of conditional statements: basic or multi-conditional. 
+
+Manipulate data using conditional statement logic. 
+
+Structure different types of conditional statements in the Formula tool’s Expression Editor. ","Esther Matthews"
+"Create Your First Analytic App ","01:30","[""Designer""]","Need to share information but not everyone in your organization uses Designer? In this introductory course, learn how to transform your workflow into an analytic application to share information across your organization. ","This course is designed for Designer users who want to build analytic apps that let others run workflows without having to create them. ","A licensed copy of Alteryx Designer. 
+
+Proficiency in using Designer Desktop. ","Transform a workflow into an analytic app. 
+
+Customize an app interface. 
+
+Debug an app to fix potential errors. ","Esther Matthews"
+"Create Your First Report ","01:30","[""Designer""]","Turn your data into compelling stories with Designer! This introductory course dives into the powerful reporting tools in Designer, showing you how to create static visual reports that automate the sharing of charts, tables, and maps. If you are familiar with Designer, this hands-on course will bridge the gap between data preparation and impactful reporting. Unlock the potential of these tools to streamline your reporting process and impress your audience with polished, automated results! ","This course is intended for users who are already familiar with Designer and want to expand their skills by creating reports using the tools in the Reporting tool palette. ","A licensed copy of Designer Desktop.  
+
+A basic understanding of data preparation and blending capabilities in Designer. ","Prepare data for use in Reporting tools. 
+
+Create data snippets. 
+
+Join and arrange snippets horizontally and vertically. 
+
+Output a dynamic PDF report.  ","Esther Matthews"
+"Designer Cloud Foundations","04:00","[""Designer""]","Take the next step in your cloud analytics journey! Join this half-day, hands-on course to develop essential skills for preparing and analyzing data to solve real business problems using Alteryx Designer Cloud. Along the way, you will build a workflow using some of the most commonly used tools and visualize your results in real time with the Interactive Results Grid. Perfect for advancing your Designer Cloud expertise! ","This course is designed for learners with a basic understanding of the Alteryx Analytics Cloud platform who are seeking a comprehensive introduction to Designer Cloud. ","A licensed copy of Alteryx Designer Cloud.","Build a workflow in Designer Cloud that analyzes data across multiple sources. 
+
+Answer specific stakeholder business questions based on your analysis. ","Esther Matthews"
+"Designer Desktop Foundations","04:00","[""Designer""]","Ready to dive into Alteryx Designer Desktop? If you are a beginner or have minimal experience with Designer, join this half-day, hands-on course that will guide you step-by-step as you build a robust workflow and master the essential tools from the Favorites category. By the end of the course, you will walk away with the confidence and skills to create your own data solutions and tackle real-world business questions. Come discover the power of Alteryx Designer and kick-start your journey in data analytics. ","This course is designed for learners seeking a comprehensive introduction to Alteryx Designer.","A licensed copy of Alteryx Designer. ","Using all the tools from the Favorites category in Designer, build a workflow that answers business questions with data. ","Esther Matthews"
+"Designer Desktop Tips and Tricks","01:30","[""Designer""]","Supercharge your Designer Desktop workflow! This course delivers over a dozen quick, standalone tips to save time on repetitive tasks, unlock hidden features, and leverage new tools. Perfect for users with basic Designer Desktop skills—learn shortcuts, precision hacks, and automation tricks to refine projects faster. Leave new techniques in your skillset to maximize your data analytics creativity and efficiency.","This course is ideal for learners of all experience levels in Designer Desktop who want to boost their efficiency with time-saving tips, shortcuts, and advanced workflow techniques. ","A licensed copy of Alteryx Designer Desktop. 
+
+A basic understanding of the Designer Desktop interface, tools, and data preparation and blending capabilities. ","Build and test workflows more efficiently. 
+
+Explore new tools and features. 
+
+Find hidden Easter eggs. ","Esther Matthews"
+"Explore Data Quality and Scope with Data Investigation Tools ","01:30","[""Designer""]","In this course, you will explore data quality and scope using Data Investigation tools. These tools will help you assess data cleanliness and analyze frequency and distribution, providing insights into the shape and characteristics of your data and guiding you in choosing the best approaches and tools for your analysis.  
+
+You will develop the skills to identify what is significant, detect issues like outliers and null values, analyze how data is distributed within fields, and determine whether the data is ready for use in future predictive models. ","This course is designed for anyone looking to assess data quality and scope using Data Investigation tools.  ","A licensed copy of Alteryx Designer with the Data Investigation tool palette enabled. 
+
+General Alteryx knowledge and proficiency in data preparation, transformation, and manipulation is essential.  ","Explore the data quality and scope of a dataset using the Field Summary, Frequency Table, Histogram, and Distribution Analysis tools. ","Esther Matthews"
+"Explore Data Relationship with Data Investigation Tools","01:30","[""Designer""]","In this course, you will explore key data relationships—correlation, collinearity, and association—to uncover patterns and influences within your dataset. By using the Data Investigation tools, you will learn how variables interact, identify redundancies, and recognize meaningful connections. These relationship types can determine how you set up a predictive model, and how to best work with your data in other analyses. ","This course is designed for anyone looking to assess data relationships using Data Investigation tools.  ","A licensed copy of Alteryx Designer with the Data Investigation tool palette enabled. 
+
+General Alteryx knowledge and proficiency in data preparation, transformation, and manipulation is essential. 
+
+Completion of the Explore Data Quality and Scope with Data Investigation Tools course is recommended. ","Use the Data Investigation tools to uncover and account for relationships and associations to determine which data elements are suitable for predictive modeling. ","Esther Matthews"
+"Gather Insights from PDFs with CV Tools ","01:30","[""Intelligence Suite""]","Join this hands-on course to discover how Computer Vision tools can help you extract and analyze information out of PDFs efficiently. Designer Core certification is recommended, and Intelligence Suite installation is required.","This course is designed for experienced designer users who want to learn to extract information from PDF documents for use in their Designer workflows. ","A licensed copy of Alteryx Designer. 
+
+Alteryx Intelligence Suite Installation. ","Build a workflow using Computer Vision tools to automate the extraction of information from PDFs. ","Esther Matthews"
+"Get Started with Alteryx Designer","01:30","[""Designer""]","In this course, you learn how to navigate the Designer user interface, locate essential resources, and build your first workflow to solve some common data challenges. If you are just starting your journey with Alteryx, this course will set you up for success.","This course is designed for anyone who wants to learn how to use Alteryx Designer to perform analytics tasks. ","A licensed copy of Alteryx Designer. 
+
+An Alteryx Community account is required. ","Navigate the Alteryx Designer user interface. 
+
+Locate Alteryx resources and Help documentation. 
+
+Build your first Designer workflow. ","Esther Matthews"
+"Get Started with Alteryx Server","01:30","[""Server""]","Discover the power of Alteryx Server to automate your processes. In this course, which includes a demonstration, you will learn how to navigate the Server user interface and how to organize, run, and schedule workflows in Server. This course does not include hands-on activities.","This course is designed for anyone who wants to learn more about Alteryx Server. ","A license of Alteryx Server is recommended. ","Navigate the Server user interface. 
+
+Organize, run, and schedule workflows in Server. ","Esther Matthews"
+"Get Started with Auto Insights","01:30","[""Auto Insights""]","Say goodbye to static dashboards that only answer half your questions. With Alteryx Auto Insights, uncover clear, trustworthy explanations of your data to make informed decisions. Learn how to personalize your data story, leverage machine learning to surface key patterns, and understand the ""why"" behind your results. This introductory course will walk you through the core features of Auto Insights, helping you transform raw data into actionable business insights. ","This course is designed for anyone who wants to take the quality of their analysis to the next level by going beyond numbers and statistics to find patterns, stories, and trends in data. ","A licensed copy of Alteryx Auto Insights is required. ","Create your first Mission using Auto Insights. 
+
+Generate a PowerPoint presentation using Magic Documents. ","Esther Matthews"
+"Get Started with Data Connection Manager ","01:30","[""Server""]","This course teaches the foundational concepts of data connection management in Alteryx Designer and Server. During this course, you will learn about the key benefits of using Data Connection Manager (DCM), how to set up and configure DCM in Designer and Server, and how to share connections to collaborate in Server environments. ","This course is designed for anyone who wants to learn how to set up and configure Data Connection Manager in Alteryx Designer and Server. ","Knowledge of how to set up connections to databases or other data sources is recommended. 
+
+Knowledge of Alteryx Server Gallery is recommended. ","Define the key benefits of using DCM. 
+
+Identify different ways to set up and configure DCM for Alteryx Designer and Server. 
+
+Identify how to share connections to collaborate in Server environments. ","Esther Matthews"
+" Get Started with Designer Cloud ","01:30","[""Designer""]","Modernize and elevate your data skills with Alteryx Designer Cloud! This beginner-friendly course gives you hands-on practice building an efficient workflow that connects seamlessly to files uploaded to Alteryx Analytics Cloud. Discover how to prep, blend, and automate your Designer Cloud workflows in a transparent, repeatable way. ","This course is ideal for learners who are new to Designer Cloud and want hands-on experience building efficient, repeatable workflows in Alteryx Analytics Cloud. ","A licensed copy of Designer Cloud. ","Navigate the Designer Cloud interface. 
+
+Read in data and build your first workflow. 
+
+Use the Interactive Results Grid for faster, guided data transformation powered by AI. ","Esther Matthews"
+"Manipulating Spatial Objects ","01:30","[""Designer""]","This advanced course explores Alteryx spatial tools for creating, transforming, and analyzing spatial objects. Through hands-on activities and a case study, you will practice combining polygons, performing spatial matches, and finding nearest locations to enhance spatial analysis and decision-making. ","This course is designed for users with intermediate-level proficiency in Alteryx who want to work with spatial data or do spatial analysis in Alteryx    Designer. ","A licensed copy of Alteryx Designer. ","Use spatial tools to combine, transform, and analyze spatial objects for accurate data insights. ","Esther Matthews"
+"Master Complex String Data Manipulation with RegEx ","01:30","[""Designer""]","Gain expertise and confidence to tackle the most complex string data manipulation tasks. In the hands-on exercises in this course, unlock your ability to parse, extract, and replace targeted information from complex data strings. ","This course is designed for intermediate Alteryx Designer users who want to master the RegEx tool to manipulate text patterns in data and handle complex string tasks. ","A licensed copy of Alteryx Designer. ","Define regular expressions and list their important uses.​ 
+
+Parse and extract targeted information from complex data strings. ","Esther Matthews"
+"Preparing Data and Writing Expressions ","01:30","[""Designer""]","Start your journey to clean and prepare data with Alteryx Designer! This beginner-friendly course introduces you to essential data preparation tools and the power of Designer’s expression editor. You will learn how to calculate, filter, sample, and sort data with ease, setting the stage for seamless downstream analysis. If you are new to Designer, this course is the perfect way to build a strong foundation for your data workflows.  
+
+Note: This content overlaps with the Designer Desktop Foundations course, so choose the course that best fits your learning goals. ","This course is designed for learners new to Alteryx Designer and want to build a solid foundation in data preparation using core tools and expressions. ","A licensed copy of Alteryx Designer. ","Cleanse and prepare imperfect data for use in downstream analysis. 
+
+Write expressions in the Formula tool. ","Esther Matthews"
+"Reshape Your Data with Parse and Transform Tools ","01:30","[""Designer""]","Unlock the full potential of your data with Alteryx Designer! Dive into transformation techniques to parse datasets into columns, pivot data, and summarize key metrics. Learn how to reshape and enrich your data to uncover valuable insights and answer critical business questions. If you are ready to go beyond the basics, this course builds on foundational skills (including some overlap with the Translate Excel Processes to Designer Desktop course) to help you master powerful data transformation tools. ","This course is intended for users who are comfortable with the basics of Alteryx Designer and want to advance their skills in transforming, reshaping, and enriching data for deeper analysis. ","A licensed copy of Alteryx Designer ","Parse data to rows and columns with delimiters. 
+
+Pivot the orientation of data to better suit your analysis. 
+
+Summarize data to answer business questions. ","Esther Matthews"
+"Save Time with Batch Macros ","01:30","[""Designer""]","Are you using numerous Filter tools to run separate processes on different groups of data? Discover how to harness the power of batch macros to group data into batches and process them one at a time. In this course, you will learn when to consider and how to both create and share a batch macro. Having prior knowledge of standard macros is highly recommended to enhance your learning experience in this course. ","This course is ideal for users who are familiar with standard macros and want to streamline complex workflows by learning how to build and apply batch macros in Designer Desktop. ","A licensed copy of Alteryx Designer 
+
+Proficiency with the Interface tool palette and creating Macros in Designer ","Create a macro that streamlines repetitive workflow processes by batching record groups. 
+
+Share a macro with other users. ","Esther Matthews"
+"See the Future: Time Series Modeling ","01:30","[""Designer""]","Ever wonder how to anticipate what is next using your data? In this interactive course, you will uncover the secrets of time series analysis and forecasting. Learn how to identify patterns, analyze trends, and predict future behavior based on past observations. Ideal for anyone working with time-based data, this course requires a basic understanding of predictive models and a prior download of the Predictive tools. ","This course is designed for users who work with time-based data and want to learn time series analysis and forecasting techniques. ","A licensed copy of Alteryx Designer 
+
+Predictive tools installation ","Describe the main components of time series analysis. 
+
+Create a time-based model using historical data. ","Esther Matthews"
+"Text Mining and Sentiment Analysis in AIS ","01:30","[""Intelligence Suite""]","Qualitative data is often overlooked in the world of numerical analysis. This course covers the fundamentals of working with unstructured text data, helping you identify patterns like trends, sentiments, and key topics. It is ideal if you want to perform analysis on customer feedback, reviews, surveys, or other text-based data, and you have little experience in natural language processing and text mining. A solid foundation in Designer Desktop is required. ","This course is ideal for experienced Designer Desktop users who want to learn to analyze patterns and sentiment in unstructured text data. ","A licensed copy of Alteryx Designer 
+
+Alteryx Intelligence Suite Installation ","Use text mining tools to uncover themes, sentiments, and key insights from unstructured data. ","Esther Matthews"
+"The Favorites Tools ","01:30","[""Designer""]","The Favorites Tools Workshop is a hands-on session designed to help you master the most commonly used tools in Alteryx Designer. Through practical exercises, you will prepare, join, and analyze data to solve real-world business scenarios. Guided by your instructor, you’ll build a workflow from scratch using only the Favorites category, gaining confidence in the core building blocks of Alteryx. ","This course is designed for anyone who wants to learn how to use Alteryx Designer to perform analytics tasks. ","A licensed copy of Alteryx Designer.","Build a workflow that includes tools from the Favorites category in Alteryx Designer. ","Esther Matthews"
+"Translate Excel Processes to Designer Cloud","01:30","[""Designer""]","Ready to move your Excel files into the Cloud? In this intermediate course, discover how to translate your most-used Excel functions into automated, repeatable workflows in Designer Cloud. Replace tedious data refreshes and manipulations with visual, auditable processes that save you time and effort. This hands-on course will show you how to revolutionize your approach to cloud data analysis! A basic understanding of Designer Cloud is required. ","This course is designed for users who regularly work in Excel and are ready to modernize their workflows by building automated, repeatable processes in Designer Cloud. ","A licensed copy of Designer Cloud 
+
+A basic understanding of Designer Cloud ","Transfer common, manual processes from Microsoft Excel to a Designer Cloud workflow. ","Esther Matthews"
+"Translate Excel Processes to Designer Desktop","01:30","[""Designer""]","Ready to break free from the manual grind of Excel? In this intermediate course, discover how to translate your most-used Excel functions into automated, repeatable workflows in Alteryx Designer Desktop. Replace tedious data refreshes and manipulations with visual, auditable processes that save you time and effort. A basic understanding of Designer is required. ","This course is ideal for Excel users who are ready to streamline their work by building automated, repeatable workflows in Alteryx Designer Desktop. ","A licensed copy of Alteryx Designer is required. 
+
+A basic understanding of Designer is required. ","Transfer common, manual processes from Microsoft Excel to an automation-ready Designer Desktop workflow. ","Esther Matthews"
+"Unlock Location-Based Insights with Spatial Analytics","01:30","[""Designer""]","Join this introductory course and learn how to use Spatial tools to build a workflow that gives insights into geospatial information. ","This course is designed for analysts and business users who need to prepare and analyze location-based data using Alteryx Designer. ","A licensed copy of Alteryx Designer is required 
+
+A basic understanding of Designer is required ","Analyze spatial data to determine locations, routes, and areas on a map. 
+
+Construct a trade area using spatial data. ","Esther Matthews"
+"Workflow and Configuration Best Practices","01:30","[""Designer""]","Best practices for new users! Discover settings that improve runtime and performance. Customize your tool palette and navigate Alteryx Designer Desktop with shortcuts. Share the genius of your workflow's logic with proper documentation.","This course is ideal for new Alteryx Designer users who want to improve performance, streamline navigation, and apply best practices from the start. ","A licensed copy of Alteryx Designer is required.","Efficiently build workflows in Alteryx Designer. 
+
+Improve your workflow’s logic and shareability. ","Esther Matthews"

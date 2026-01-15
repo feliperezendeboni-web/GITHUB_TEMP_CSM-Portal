@@ -1,3 +1,4 @@
+
 // Auto-translation mapping for section titles
 window.sectionTitles = {
     pt: {
